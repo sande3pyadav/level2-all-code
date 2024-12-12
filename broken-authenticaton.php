@@ -58,8 +58,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         echo "No action specified.";
     }
 } else {
-    // Simple HTML form for demonstration with embedded CSS and JavaScript
-    echo <<<HTML
+    // Simple HTML form for demonstration with embedded CSS
+    ?>
     <!DOCTYPE html>
     <html>
     <head>
@@ -73,6 +73,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             .navbar {
                 overflow: hidden;
                 background-color: #333;
+                position: fixed;
+                top: 0;
+                width: 100%;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
             }
             .navbar a {
                 float: left;
@@ -81,22 +85,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 text-align: center;
                 padding: 14px 20px;
                 text-decoration: none;
+                transition: background-color 0.3s, color 0.3s;
             }
             .navbar a:hover {
-                background-color: #ddd;
-                color: black;
+                background-color: #575757;
+                color: #fff;
             }
             .form-container {
                 max-width: 400px;
-                margin: 20px auto;
+                margin: 100px auto;
                 padding: 20px;
                 background-color: #fff;
                 border-radius: 10px;
-                box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+                box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
             }
             .form-container h2 {
                 text-align: center;
                 color: #333;
+                margin-bottom: 20px;
+                font-size: 1.5rem;
             }
             .form-container input[type="text"],
             .form-container input[type="password"] {
@@ -105,10 +112,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 margin: 5px 0 20px 0;
                 display: inline-block;
                 border: 1px solid #ccc;
+                border-radius: 5px;
                 box-sizing: border-box;
+                transition: border-color 0.3s;
+            }
+            .form-container input[type="text"]:focus,
+            .form-container input[type="password"]:focus {
+                border-color: #0078d7;
             }
             .form-container input[type="submit"] {
-                background-color: #4CAF50;
+                background-color: #0078d7;
                 color: white;
                 padding: 14px 20px;
                 margin: 8px 0;
@@ -116,9 +129,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 cursor: pointer;
                 width: 100%;
                 border-radius: 5px;
+                transition: background-color 0.3s;
             }
             .form-container input[type="submit"]:hover {
-                background-color: #45a049;
+                background-color: #005bb5;
             }
             .hidden {
                 display: none;
@@ -127,58 +141,51 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </head>
     <body>
         <div class="navbar">
-            <a href="#" onclick="showForm('login')">Login</a>
-            <a href="#" onclick="showForm('register')">Register</a>
-            <a href="#" onclick="showForm('resetPassword')">Reset Password</a>
-            <a href="#" onclick="showForm('deleteAccount')">Delete Account</a>
+            <a href="?form=login">Login</a>
+            <a href="?form=register">Register</a>
+            <a href="?form=resetPassword">Reset Password</a>
+            <a href="?form=deleteAccount">Delete Account</a>
         </div>
-        <div id="loginForm" class="form-container hidden">
-            <h2>Login</h2>
+        <div class="form-container">
+            <h2>
+                <?php
+                if (isset($_GET['form'])) {
+                    switch ($_GET['form']) {
+                        case 'register':
+                            echo 'Register';
+                            break;
+                        case 'resetPassword':
+                            echo 'Reset Password';
+                            break;
+                        case 'deleteAccount':
+                            echo 'Delete Account';
+                            break;
+                        default:
+                            echo 'Login';
+                    }
+                } else {
+                    echo 'Login';
+                }
+                ?>
+            </h2>
             <form method="post">
-                <input type="hidden" name="action" value="login">
-                Username: <input type="text" name="username"><br>
-                Password: <input type="password" name="password"><br>
-                <input type="submit" value="Login">
+                <input type="hidden" name="action" value="<?php echo isset($_GET['form']) ? $_GET['form'] : 'login'; ?>">
+                <label for="username">Username:</label>
+                <input type="text" name="username" id="username" required><br>
+                <?php
+                if (isset($_GET['form']) && $_GET['form'] === 'resetPassword') {
+                    echo '<label for="new_password">New Password:</label>';
+                    echo '<input type="password" name="new_password" id="new_password" required><br>';
+                } else if (!isset($_GET['form']) || $_GET['form'] !== 'deleteAccount') {
+                    echo '<label for="password">Password:</label>';
+                    echo '<input type="password" name="password" id="password" required><br>';
+                }
+                ?>
+                <input type="submit" value="Submit">
             </form>
         </div>
-        <div id="registerForm" class="form-container hidden">
-            <h2>Register</h2>
-            <form method="post">
-                <input type="hidden" name="action" value="register">
-                Username: <input type="text" name="username"><br>
-                Password: <input type="password" name="password"><br>
-                <input type="submit" value="Register">
-            </form>
-        </div>
-        <div id="resetPasswordForm" class="form-container hidden">
-            <h2>Reset Password</h2>
-            <form method="post">
-                <input type="hidden" name="action" value="resetPassword">
-                Username: <input type="text" name="username"><br>
-                New Password: <input type="password" name="new_password"><br>
-                <input type="submit" value="Reset Password">
-            </form>
-        </div>
-        <div id="deleteAccountForm" class="form-container hidden">
-            <h2>Delete Account</h2>
-            <form method="post">
-                <input type="hidden" name="action" value="deleteAccount">
-                Username: <input type="text" name="username"><br>
-                <input type="submit" value="Delete Account">
-            </form>
-        </div>
-
-        <script>
-            function showForm(formId) {
-                var forms = document.querySelectorAll('.form-container');
-                forms.forEach(function(form) {
-                    form.classList.add('hidden');
-                });
-                document.getElementById(formId).classList.remove('hidden');
-            }
-        </script>
     </body>
     </html>
-HTML;
+    <?php
 }
 ?>
